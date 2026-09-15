@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AD-WM learns action-discriminative latent dynamics for counterfactual model predictive control. Anonymous research project page.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f7f8fa">
+  <title>AD-WM · Action-Discriminative World Models</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="nav wrap" aria-label="Main navigation">
+    <a class="wordmark" href="#top"><span class="mark" aria-hidden="true">a↗</span> AD-WM</a>
+    <div class="nav-links"><a href="#problem">Problem</a><a href="#method">Method</a><a href="#results">Results</a><a href="#demos">Demos</a><a href="#diagnostics">Diagnostics</a></div>
+  </nav>
+</header>
+<main id="main">
+  <section class="hero wrap" id="top" aria-labelledby="project-title">
+    <p class="eyebrow">Anonymous research project · ICRA 2027 submission</p>
+    <h1 id="project-title"><span class="title-name">AD-WM</span><span>Action-Discriminative World Models</span><span class="title-sub">for Counterfactual Model Predictive Control</span></h1>
+    <p class="authors">Anonymous Authors</p>
+    <div class="hero-video" role="img" aria-label="Project overview video placeholder; video will be added later"><span class="video-outline" aria-hidden="true">▷</span><span>Project video</span><small>Coming soon</small></div>
+    <p class="hero-message">Learning to distinguish <em>what different actions will do.</em></p>
+    <p class="hero-description">AD-WM preserves action-dependent changes in latent predictions, helping a world model compare candidate actions and plan toward an image goal.</p>
+    <div class="actions"><a class="button primary" href="assets/paper.pdf">Read the paper <span aria-hidden="true">↗</span></a><a class="button" href="#demos">Explore demos <span aria-hidden="true">↓</span></a></div>
+    <div class="highlights">
+      <div><p class="metric">3.7<span> → </span><strong>52.0%</strong></p><p>Cube hard-start success</p><small>Matched LeWM → AD-WM</small></div>
+      <div><p class="metric">42.2<span> → </span><strong>71.1%</strong></p><p>Franka pick-and-place success</p><small>Matched V-JEPA 2-AC → AD-WM</small></div>
+      <div><p class="metric"><strong>4</strong><span> / </span>5</p><p>Simulation environments improve</p><small>Mean success vs. reproduced LeWM</small></div>
+    </div>
+  </section>
+
+  <section class="section tinted" id="problem" aria-labelledby="problem-title"><div class="wrap split">
+    <div><p class="eyebrow">01 / The problem</p><h2 id="problem-title">Good predictions.<br>But which action?</h2><p>A recorded transition tells us what happened after one action. Planning asks a different question: <strong>which of several possible actions brings us closer to the goal?</strong></p><p>When most visual content stays the same, a world model can achieve low prediction error while missing the small action-dependent changes that matter for control.</p><div class="takeaway">World models for planning need to preserve the differences between candidate actions.</div></div>
+    <figure class="figure-card"><a href="assets/figures/problem.webp" aria-label="Open the problem illustration at full size"><img src="assets/figures/problem.webp" width="2000" height="1431" loading="lazy" alt="A world model may collapse different candidate actions into similar predictions; AD-WM preserves distinctions that guide selection toward the cube-grasping goal."></a><figcaption>Same observation. Alternative actions. Different consequences.</figcaption></figure>
+  </div></section>
+
+  <section class="section wrap" id="method" aria-labelledby="method-title">
+    <div class="section-heading"><p class="eyebrow">02 / The method</p><h2 id="method-title">Make action information recoverable.</h2><p>Residual latent prediction and two training objectives shape the transitions used by the planner.</p></div>
+    <div class="method-steps">
+      <article><span class="step">01</span><h3>Predict the change</h3><p>The predictor estimates a latent increment and adds it to the current representation.</p><div class="equation" aria-label="Predicted next latent equals current latent plus predicted latent change">ẑ<sub>t+1</sub> = z<sub>t</sub> + Δẑ<sub>t</sub></div></article>
+      <article><span class="step">02</span><h3>Recover the action</h3><p>Inverse dynamics and normalized action recovery encourage the current and predicted next representations to retain action information.</p><span class="small-tag">Predictor-level supervision</span></article>
+      <article><span class="step">03</span><h3>Plan with the learned model</h3><p>CEM compares latent rollouts, executes the first action block, and replans. Auxiliary recovery heads are discarded at deployment.</p><span class="small-tag">Same MPC procedure</span></article>
+    </div>
+    <figure class="figure-card method-figure"><a href="assets/figures/method.webp" aria-label="Open the method diagram at full size"><img src="assets/figures/method.webp" width="2000" height="1102" loading="lazy" alt="AD-WM training uses residual latent dynamics, inverse dynamics, normalized action recovery, and prediction supervision. At test time, a shared encoder and CEM planner compare counterfactual latent rollouts."></a><figcaption>In simulation, the encoder and predictor are trained jointly with SIGReg. Robot post-training uses a frozen V-JEPA 2 encoder and omits SIGReg.</figcaption></figure>
+  </section>
+
+  <section class="section tinted" id="results" aria-labelledby="results-title"><div class="wrap">
+    <div class="section-heading"><p class="eyebrow">03 / Results</p><h2 id="results-title">From simulation to a real robot.</h2><p>Results from the current paper, using matched baselines for the headline comparisons.</p></div>
+    <div class="results-grid">
+      <article class="result-card"><div class="card-heading"><h3>Across five environments</h3><span class="unit">Success (%) ↑</span></div><div class="legend"><span><i class="baseline"></i>LeWM reproduction</span><span><i class="ours"></i>AD-WM</span></div>
+        <div class="bar-chart" role="img" aria-label="Success percentages for LeWM versus AD-WM: Cube 73.3 versus 90.7; Reacher 76.7 versus 83.3; TwoRoom 90 versus 98; PushT 94 versus 92; Scene 35.5 versus 39.5.">
+          <div class="bar-row"><span>Cube</span><div><div class="bar baseline" style="--value:73.3%">73.3</div><div class="bar ours" style="--value:90.7%">90.7</div></div></div>
+          <div class="bar-row"><span>Reacher</span><div><div class="bar baseline" style="--value:76.7%">76.7</div><div class="bar ours" style="--value:83.3%">83.3</div></div></div>
+          <div class="bar-row"><span>TwoRoom</span><div><div class="bar baseline" style="--value:90%">90.0</div><div class="bar ours" style="--value:98%">98.0</div></div></div>
+          <div class="bar-row"><span>PushT</span><div><div class="bar baseline" style="--value:94%">94.0</div><div class="bar ours" style="--value:92%">92.0</div></div></div>
+          <div class="bar-row"><span>Scene*</span><div><div class="bar baseline" style="--value:35.5%">35.5</div><div class="bar ours" style="--value:39.5%">39.5</div></div></div>
+        </div><p class="caption">Means shown. *Scene uses balanced hard starts; other environments use original protocols. PushT decreases by 2 points. Scene’s overall gain is unresolved by the paired seed test (p = 0.13).</p>
+      </article>
+      <article class="result-card"><div class="card-heading"><h3>Cube under harder starts</h3><span class="unit">Success (%) ↑</span></div><p class="card-intro">Tabletop starts without gripper contact, with increasing cube xy perturbation radii.</p><div class="table-scroll"><table><caption class="sr-only">Cube matched baseline comparison, means over three seeds</caption><thead><tr><th scope="col">Protocol</th><th scope="col">LeWM</th><th scope="col">AD-WM</th></tr></thead><tbody>
+        <tr><th scope="row">Original</th><td>73.3</td><td class="ours-text">90.7</td></tr><tr><th scope="row">P00 · 0 cm</th><td>8.0</td><td class="ours-text">74.0</td></tr><tr><th scope="row">P01 · 1 cm</th><td>4.7</td><td class="ours-text">68.0</td></tr><tr><th scope="row">P02 · 2 cm</th><td>4.7</td><td class="ours-text">56.0</td></tr><tr><th scope="row">P03 · 3 cm</th><td>1.3</td><td class="ours-text">36.7</td></tr><tr><th scope="row">P04 · 4 cm</th><td>0.0</td><td class="ours-text">25.3</td></tr><tr class="summary-row"><th scope="row">Hard-start mean</th><td>3.7 ± 1.4</td><td class="ours-text">52.0 ± 3.1</td></tr>
+      </tbody></table></div><p class="caption">50 episodes per protocol per checkpoint; three seeds. Hard-start mean averages P00–P04; ± population SD. P00 already differs from Original despite zero perturbation.</p></article>
+    </div>
+    <details class="paper-details"><summary>Context: external baselines and component ablations</summary><div><p>External methods retain native inference. INTACT Direct has the highest mean from Original through P02; AD-WM reaches 25.3% on P04 versus 10.0% for INTACT Direct and 10.7% for Actor-CEM. Differences in training and inference limit attribution of this crossover.</p><p>Cube hard-start ablations: residual prediction alone reaches 34.7%, Res + Inv reaches 37.1%, Res + MI reaches 54.7%, and the default AD-WM reaches 52.0%. Residual prediction and normalized recovery contribute the largest gains; inverse dynamics has a smaller, weight-dependent effect.</p></div></details>
+    <article class="robot-result"><div class="robot-heading"><div><p class="eyebrow">Real-world transfer</p><h3>Zero-shot Franka manipulation</h3><p>A frozen V-JEPA 2 encoder and matched DROID post-training, without laboratory-specific adaptation.</p></div><p class="robot-stat">19/45 <span>→</span> <strong>32/45</strong><small>Basic pick-and-place successes</small></p></div>
+      <figure><a href="assets/figures/robot-protocols.webp" aria-label="Open Franka setup and evaluation protocols"><img src="assets/figures/robot-protocols.webp" width="2000" height="1125" loading="lazy" alt="Franka robot setup, three evaluation protocols, and matched examples: AD-WM grasps the cube and moves the specified target while V-JEPA 2-AC misses the grasp or moves the wrong target."></a><figcaption>Shared image goals, execution stages, gripper handling, action clipping, and CEM planning.</figcaption></figure>
+      <div class="table-scroll"><table><caption>Successes / trials per model</caption><thead><tr><th scope="col">Evaluation</th><th scope="col">V-JEPA 2-AC</th><th scope="col">AD-WM</th></tr></thead><tbody><tr><th scope="row">Basic pick-and-place</th><td>19 / 45</td><td class="ours-text">32 / 45</td></tr><tr><th scope="row">Complex-object success</th><td>2 / 10</td><td class="ours-text">5 / 10</td></tr><tr><th scope="row">Specified target moved</th><td>14 / 27</td><td class="ours-text">21 / 27</td></tr><tr><th scope="row">Specified-target lift-and-place</th><td>9 / 27</td><td class="ours-text">17 / 27</td></tr></tbody></table></div>
+      <p class="caption">Evaluation uses manually supplied grasp, move, and place image goals with a structured execution pipeline. Trials use separate, non-randomized model blocks; smaller protocols have limited precision.</p>
+    </article>
+  </div></section>
+
+  <section class="section wrap" id="demos" aria-labelledby="demos-title">
+    <div class="section-heading"><p class="eyebrow">04 / Demos</p><h2 id="demos-title">Goal-conditioned control in action.</h2><p>Selected simulation rollouts across manipulation, reaching, navigation, and pushing.</p></div>
+    <div class="filters" role="group" aria-label="Filter demos by environment"><button type="button" aria-pressed="true" data-filter="all">All tasks</button><button type="button" aria-pressed="false" data-filter="cube">Cube</button><button type="button" aria-pressed="false" data-filter="scene">Scene</button><button type="button" aria-pressed="false" data-filter="reacher">Reacher</button><button type="button" aria-pressed="false" data-filter="tworoom">TwoRoom</button><button type="button" aria-pressed="false" data-filter="pusht">PushT</button></div>
+    <p class="caption demo-note">Paired examples show LeWM failure and AD-WM success from matched starts; solo examples show selected AD-WM successes. These clips illustrate behavior, not aggregate success rates. Playback omits planning wait time.</p>
+    <div class="demo-grid">
+      <article class="demo-card" data-env="cube"><div class="demo-labels"><span>LeWM</span><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/cube-tabletop.webp" aria-label="Cube tabletop grasping comparison"><source src="assets/videos/cube-tabletop.mp4" type="video/mp4"><source src="assets/videos/cube-tabletop.webm" type="video/webm"></video><div class="demo-caption"><h3>Grasp from the tabletop</h3><p>Cube · P00 hard start · paired comparison</p></div></article>
+      <article class="demo-card" data-env="cube"><div class="demo-labels"><span>LeWM</span><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/cube-perturbed.webp" aria-label="Cube large perturbation comparison"><source src="assets/videos/cube-perturbed.mp4" type="video/mp4"><source src="assets/videos/cube-perturbed.webm" type="video/webm"></video><div class="demo-caption"><h3>Reach from a perturbed start</h3><p>Cube · P04 hard start · paired comparison</p></div></article>
+      <article class="demo-card" data-env="scene"><div class="demo-labels"><span>LeWM</span><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/scene-drawer.webp" aria-label="Scene drawer opening comparison"><source src="assets/videos/scene-drawer.mp4" type="video/mp4"><source src="assets/videos/scene-drawer.webm" type="video/webm"></video><div class="demo-caption"><h3>Open the drawer</h3><p>Scene · balanced hard start · paired comparison</p></div></article>
+      <article class="demo-card" data-env="scene"><div class="demo-labels"><span>LeWM</span><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/scene-window.webp" aria-label="Scene window sliding comparison"><source src="assets/videos/scene-window.mp4" type="video/mp4"><source src="assets/videos/scene-window.webm" type="video/webm"></video><div class="demo-caption"><h3>Slide the window</h3><p>Scene · balanced hard start · paired comparison</p></div></article>
+      <article class="demo-card" data-env="reacher"><div class="demo-labels solo"><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/reacher.webp" aria-label="Reacher AD-WM reaching rollout"><source src="assets/videos/reacher.mp4" type="video/mp4"><source src="assets/videos/reacher.webm" type="video/webm"></video><div class="demo-caption"><h3>Reach the target pose</h3><p>Reacher · original protocol · selected success</p></div></article>
+      <article class="demo-card" data-env="tworoom"><div class="demo-labels solo"><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/tworoom.webp" aria-label="TwoRoom AD-WM navigation rollout"><source src="assets/videos/tworoom.mp4" type="video/mp4"><source src="assets/videos/tworoom.webm" type="video/webm"></video><div class="demo-caption"><h3>Navigate through the doorway</h3><p>TwoRoom · original protocol · selected success</p></div></article>
+      <article class="demo-card" data-env="pusht"><div class="demo-labels solo"><span>AD-WM</span><span>Goal</span></div><video controls muted loop playsinline preload="none" poster="assets/posters/pusht.webp" aria-label="PushT AD-WM pushing and rotation rollout"><source src="assets/videos/pusht.mp4" type="video/mp4"><source src="assets/videos/pusht.webm" type="video/webm"></video><div class="demo-caption"><h3>Push and rotate into place</h3><p>PushT · selected success; aggregate: LeWM 94%, AD-WM 92%</p></div></article>
+    </div><p class="sr-only" id="filter-status" aria-live="polite"></p>
+  </section>
+
+  <section class="section tinted" id="diagnostics" aria-labelledby="diagnostics-title"><div class="wrap">
+    <div class="section-heading"><p class="eyebrow">05 / Understanding the planner</p><h2 id="diagnostics-title">Evaluate the actions a planner keeps.</h2><p>CEM uses a small elite set to guide its search. The quality of these candidates matters for what happens next.</p></div>
+    <article class="diagnostic-block"><div class="diagnostic-text"><span class="small-tag">Shared candidate bank</span><h3>Lower elite regret tracks higher success.</h3><p>Best-in-elite regret measures how much worse the best realized candidate retained by the model is than the best candidate in the entire bank, normalized by the realized cost range.</p><p>Across five variants and three training seeds, lower regret is associated with higher Cube hard-start success: <strong>Spearman ρ = −0.863.</strong></p><p class="caption">300 shared candidates, 30 elites. Realized outcomes are used for diagnostics only. This is a descriptive association on fixed banks; costs use each model’s own encoder.</p><a class="text-link" href="assets/figures/elite-regret.pdf">View the diagnostic PDF ↗</a></div><figure class="figure-card"><a href="assets/figures/elite-regret.pdf"><img src="assets/figures/elite-regret.webp" width="2000" height="1125" loading="lazy" alt="Scatter plot of 15 model-seed observations: lower best-in-elite regret is associated with higher Cube hard-start success, Spearman correlation minus 0.863."></a><figcaption>Five default-weight variants × three training seeds.</figcaption></figure></article>
+    <article class="surface-block"><div class="surface-heading"><div><span class="small-tag">A shared action slice</span><h3>Do low predicted costs lead closer to the goal?</h3></div><p>One selected qualitative diagnostic compares both models on the same physical action grid, then executes each model’s predicted minimum.</p></div><video class="surface-video" controls muted playsinline preload="none" poster="assets/posters/action-surface.webp" aria-label="Predicted action-cost surfaces and execution of the selected actions for LeWM and AD-WM"><source src="assets/videos/action-surface.mp4" type="video/mp4"><source src="assets/videos/action-surface.webm" type="video/webm"></video><div class="surface-footer"><p><span class="baseline-dot"></span>LeWM final cube error <strong>5.04 cm</strong></p><p><span class="ours-dot"></span>AD-WM final cube error <strong>2.69 cm</strong></p></div><p class="caption">Selected case 48; a 31 × 31 shared grid adds up to ±2 cm of x/y command offset per step to the first five steps of a common reference sequence, with action clipping. Model cost scales are separate; the reported physical error uses the same cube-to-goal distance. This selected example is not a new aggregate success estimate and does not establish a global optimum.</p></article>
+  </div></section>
+  <section class="closing wrap"><p class="eyebrow">Takeaway</p><h2>Preserve the differences<br>that matter for choosing actions.</h2><p>Action-discriminative training improves the latent dynamics used for counterfactual MPC, with no additional modules at test time.</p><a class="button primary" href="assets/paper.pdf">Read the full paper ↗</a></section>
+</main>
+<footer class="wrap footer"><a class="wordmark" href="#top">AD-WM</a><p>Anonymous Authors · ICRA 2027 submission</p><a href="#top">Back to top ↑</a></footer>
+</body>
+</html>
